@@ -96,9 +96,33 @@
 //     username: String,
 //     password: String,
 // }
+use dotenv::dotenv;
+use infrastructure::db::postgres::DatabaseTrait;
+use std::env;
+use std::error::Error;
+use tokio;
 
+mod infrastructure;
 mod domain;
 
-fn main() {
-    domain::entities::user_entities::hello("hello");
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn Error>> {
+    // Load environment variables from .env file
+    dotenv().ok();
+    
+    // Fetch the DATABASE_URL environment variable
+    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+
+    // Initialize the database pool
+    let pool = infrastructure::db::postgres::Database::init_pool(&database_url).await?;
+    
+    // Use the pool in your application
+    // For example, you might fetch data from the database using the pool
+    let user = infrastructure::repositories::user_repositories::get_all_users(&pool).await?;
+
+    // Print the user to the console
+    println!("{:?}", user);
+
+
+    Ok(())
 }
