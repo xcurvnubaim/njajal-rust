@@ -98,31 +98,60 @@
 // }
 use dotenv::dotenv;
 use infrastructure::db::postgres::DatabaseTrait;
-use std::env;
+use infrastructure::repositories::user_repositories::{UserRepository, UserRepositoryTrait};
+use presentation::routes;
 use std::error::Error;
+use std::sync::Arc;
 use tokio;
 
-mod infrastructure;
 mod domain;
+mod infrastructure;
+mod presentation;
+mod app;
+
+// #[tokio::main]
+// async fn main() -> Result<(), Box<dyn Error>> {
+//     // Load environment variables from .env file
+//     dotenv().ok();
+
+//     // // Initialize the database pool
+//     let pool = infrastructure::db::postgres::Database::init_pool()
+//         .await
+//         .unwrap_or_else(|e| panic!("Database error: {}", e.to_string()));
+
+//     // // Use the pool in your application
+//     // // For example, you might fetch data from the database using the pool
+    
+//     // let user = UserRepository::new(&pool)
+//     //     .get_all_users()
+//     //     .await?;
+
+//     // Print the user to the console
+//     // println!("{:?}", user[0].id);
+//     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+//     tracing_subscriber::fmt::init();
+//     axum::serve(listener, routes::root_routes::routes(Arc::new(pool)))
+//         .await
+//         .unwrap_or_else(|e| panic!("Server error: {}", e.to_string()));
+
+// }
+
+use axum::{
+    routing::get,
+    Router,
+};
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
-    // Load environment variables from .env file
+async fn main() {
     dotenv().ok();
-    
-    // Fetch the DATABASE_URL environment variable
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
 
-    // Initialize the database pool
-    let pool = infrastructure::db::postgres::Database::init_pool(&database_url).await?;
-    
-    // Use the pool in your application
-    // For example, you might fetch data from the database using the pool
-    let user = infrastructure::repositories::user_repositories::get_all_users(&pool).await?;
+    let pool = infrastructure::db::postgres::Database::init_pool()
+        .await
+        .unwrap_or_else(|e| panic!("Database error: {}", e.to_string()));
+    // build our application with a single route
+    // let app = Router::new().route("/", get(|| async { "Hello, World!" }));
 
-    // Print the user to the console
-    println!("{:?}", user);
-
-
-    Ok(())
+    // run our app with hyper, listening globally on port 3000
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    axum::serve(listener, routes::root_routes::routes(Arc::new(pool))).await.unwrap();
 }

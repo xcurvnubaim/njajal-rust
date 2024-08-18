@@ -1,28 +1,46 @@
+use std::sync::Arc;
+
+use axum::async_trait;
 use sqlx::query_as;
-use sqlx::PgPool;
-use crate::domain::entities::user_entities::User;
+use sqlx::Error;
+
+use crate::domain::entities::user_entities::GetUser;
+use crate::infrastructure::db::postgres::{Database, DatabaseTrait};
 
 
-// #[derive(Clone)]
-// pub struct UserRepository {
-//     pub(crate) db_conn: Arc<Database>,
-// }
+// use crate::domain::entities::user_entities::User;
 
-// #[async_trait]
-// pub trait UserRepositoryTrait {
-//     fn new(db_conn: &Arc<Database>) -> Self;
-//     async fn find_by_email(&self, email: String) -> Option<User>;
-//     async fn find(&self, id: u64) -> Result<User, Error>;
-// }
 
-pub async fn get_all_users(db: &PgPool) -> Result<Vec<User>, sqlx::Error> {
-    // Fetch all users from the database
-    let users = query_as!(
-        User,
-        "SELECT id, name, email FROM users"
-    )
-    .fetch_all(db)
-    .await?;
+#[derive(Clone)]
+pub struct UserRepository {
+    pub(crate) db_conn: Arc<Database>,
+}
+
+#[async_trait]
+pub trait UserRepositoryTrait {
+    fn new(db_conn: &Arc<Database>) -> Self;
+    // async fn find_by_email(&self, email: String) -> Option<User>;
+    // async fn find(&self, id: u64) -> Result<User, Error>;
+    async fn get_all_users(&self) -> Result<Vec<GetUser>, Error>;
+}
+
+#[async_trait]
+impl UserRepositoryTrait for UserRepository {
+    fn new(db_conn: &Arc<Database>) -> Self {
+        Self {
+            db_conn: Arc::clone(db_conn),
+        }
+    }
     
-    Ok(users)
+    async fn get_all_users(&self) -> Result<Vec<GetUser>, sqlx::Error> {
+        // Define the query
+        let query = "SELECT ida, name, email, password, created_at, updated_at FROM users";
+        
+        // Execute the query and fetch all rows
+        let users = query_as::<_, GetUser>(query)
+            .fetch_all(self.db_conn.get_pool())
+            .await;
+        
+        return users;
+    }
 }

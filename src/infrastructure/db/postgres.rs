@@ -1,32 +1,29 @@
 use axum::async_trait;
 use sqlx::PgPool;
-use std::error::Error;
+use std::{env, error::Error};
 
 pub struct Database {
-
+    pool: PgPool,
 }
 
 #[async_trait]
 pub trait DatabaseTrait {
-    async fn init_pool(database_url: &str) -> Result<PgPool, Box<dyn Error>>;
+    async fn init_pool() -> Result<Self, Box<dyn Error>>
+    where
+        Self: Sized;
+    fn get_pool(&self) -> &PgPool;
 }
 
 #[async_trait]
 impl DatabaseTrait for Database {
-/// Initializes and returns a PostgreSQL connection pool.
-///
-/// # Arguments
-///
-/// * `database_url` - A string slice that holds the database URL.
-///
-/// # Returns
-///
-/// Returns a `Result` containing the `PgPool` on success or an error on failure.
-    async fn init_pool(database_url: &str) -> Result<PgPool, Box<dyn Error>> {
-        // Attempt to create a connection pool
-        let pool = PgPool::connect(database_url).await?;
-        
-        // Return the connection pool
-        Ok(pool)
+    async fn init_pool() -> Result<Self, Box<dyn Error>> {
+        // Fetch the DATABASE_URL environment variable
+        let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+        let pool = PgPool::connect(&database_url).await?;
+        Ok(Self { pool })
+    }
+
+    fn get_pool(&self) -> &PgPool {
+        &self.pool
     }
 }
