@@ -1,4 +1,9 @@
 use serde::{Deserialize, Serialize};
+use thiserror::Error;
+use axum::{
+    http::StatusCode,
+    response::{IntoResponse, Response},
+};
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct ErrorResponse {

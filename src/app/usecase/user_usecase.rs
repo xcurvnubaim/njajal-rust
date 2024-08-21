@@ -113,4 +113,17 @@ impl UserUsecase {
         Ok((user, token))
     }
     
+    pub async fn get_me(&self, id: i32) -> Result<GetUser, ErrorResponse> {
+        match self.user_repository.find_by_id(id).await {
+            Ok(Some(user)) => Ok(user),
+            Ok(None) => Err(ErrorResponse::new(
+                "User not found".to_string(),
+                "UserNotFound".to_string(),
+            )),
+            Err(err) => Err(ErrorResponse::new(
+                "Failed to find user".to_string(),
+                err.to_string(),
+            )),
+        }
+    }
 }

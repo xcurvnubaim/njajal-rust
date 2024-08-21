@@ -23,6 +23,7 @@ pub trait UserRepositoryTrait {
     async fn get_all_users(&self) -> Result<Vec<GetUser>, Error>;
     async fn create_user(&self, name: String, email: String, password: String) -> Result<GetUser, Error>;
     async fn find_by_email(&self, email: String) -> Result<Option<GetUser>, Error>;
+    async fn find_by_id(&self, id: i32) -> Result<Option<GetUser>, Error>;
 }
 
 #[async_trait]
@@ -67,6 +68,19 @@ impl UserRepositoryTrait for UserRepository {
         // Execute the query and fetch the row
         let user = query_as::<_, GetUser>(query)
             .bind(email)
+            .fetch_optional(self.db_conn.get_pool())
+            .await;
+        
+        return user;
+    }
+
+    async fn find_by_id(&self, id: i32) -> Result<Option<GetUser>, Error> {
+        // Define the query
+        let query = "SELECT id, name, email, password, created_at, updated_at FROM users WHERE id = $1";
+        
+        // Execute the query and fetch the row
+        let user = query_as::<_, GetUser>(query)
+            .bind(id)
             .fetch_optional(self.db_conn.get_pool())
             .await;
         
