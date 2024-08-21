@@ -2,7 +2,6 @@ use super::user_routes;
 use axum::routing::{get, IntoMakeService};
 use axum::{middleware, Router};
 use std::sync::Arc;
-use tower::ServiceBuilder;
 use tower_http::trace::TraceLayer;
 
 use crate::app::state::user_state;

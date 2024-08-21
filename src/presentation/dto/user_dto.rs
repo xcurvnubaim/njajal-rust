@@ -1,7 +1,31 @@
 use serde::{Deserialize, Serialize};
 
 use crate::domain::entities::user_entities::GetUser;
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct GetUserDTO {
+    pub id: i32,
+    pub name: String,
+    pub email: String,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct GetUserLoginDTO {
+    pub id: i32,
+    pub name: String,
+    pub email: String,
+    pub token: String,
+}
+
+
 #[derive(Clone, Serialize, Deserialize)]
 pub struct GetAllUserDTO {
-    pub data: Vec<GetUser>,
+    pub users: Vec<GetUser>,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct CreateUserDTO {
+    pub name: String,
+    pub email: String,
+    pub password: String,
 }
