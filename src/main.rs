@@ -1,22 +1,13 @@
 use dotenv::dotenv;
 use infrastructure::db::postgres::DatabaseTrait;
-use infrastructure::repositories::user_repositories::{UserRepository, UserRepositoryTrait};
 use presentation::routes;
-use std::error::Error;
 use std::sync::Arc;
 use tokio;
-use tower_http::cors::{any, Any, CorsLayer};
 
 mod domain;
 mod infrastructure;
 mod presentation;
 mod app;
-
-
-use axum::{
-    routing::get,
-    Router,
-};
 
 #[tokio::main]
 async fn main() {

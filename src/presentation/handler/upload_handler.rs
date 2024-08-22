@@ -1,4 +1,4 @@
-use axum::{body::Bytes, extract::Multipart, http::StatusCode, routing::post, BoxError, Json, Router};
+use axum::{body::Bytes, extract::Multipart, http::StatusCode, BoxError, Json};
 use tokio_util::io::StreamReader;
 use futures::{Stream, TryStreamExt};
 use std::io;
@@ -22,7 +22,17 @@ pub async fn upload(
         };
 
         match stream_to_file(&file_name, field).await {
-            Ok(_) => {}
+            Ok(_) => {
+                return Ok((
+                    StatusCode::OK,
+                    Json(SuccessResponse::new(
+                        "Successfully uploaded file".to_string(),
+                        UploadFileDTO {
+                            file_name,
+                        },
+                    )),
+                ))
+            }
             Err((status_code, message)) => {
                 return Err((
                     status_code,
@@ -36,7 +46,7 @@ pub async fn upload(
         Json(SuccessResponse::new(
             "Successfully uploaded file".to_string(),
             UploadFileDTO {
-                file_name: "File uploaded successfully".to_string(),
+                file_name: "file_name".to_string(),
             },
         )),
     ))

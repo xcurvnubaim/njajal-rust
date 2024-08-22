@@ -1,11 +1,11 @@
 use axum::{
     middleware, 
-    routing::{get, post}, 
+    routing::post, 
     Router
 };
 use crate::{
     app::middleware::verify_token::auth, 
-    presentation::handler::{upload_handler, user_handler::{self, get_me}}
+    presentation::handler::upload_handler
 };
 
 pub fn routes() -> Router {

@@ -10,7 +10,6 @@ use crate::{
 use bcrypt::{hash, DEFAULT_COST};
 use chrono::{Duration, Utc};
 use jsonwebtoken::{encode, EncodingKey, Header};
-use core::time;
 use std::sync::Arc;
 
 #[derive(Clone)]

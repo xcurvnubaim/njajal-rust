@@ -1,11 +1,12 @@
 use super::{upload_routes, user_routes};
 use axum::routing::{get, IntoMakeService};
 use axum::Router;
+use tower_http::services::ServeDir;
 use std::sync::Arc;
 use tower_http::cors::{Any, CorsLayer};
 use tower_http::trace::TraceLayer;
 
-use crate::app::state::{token_state, user_state};
+use crate::app::state::user_state;
 use crate::infrastructure::db::postgres::Database;
 
 pub fn routes(db_conn: Arc<Database>) -> IntoMakeService<Router> {
@@ -16,6 +17,7 @@ pub fn routes(db_conn: Arc<Database>) -> IntoMakeService<Router> {
             .with_state(user_state)
             .merge(upload_routes::routes())
             .merge(Router::new().route("/health", get(|| async { "Healthy..." })))
+            .merge(Router::new().nest_service("/file", ServeDir::new("uploads")))
     };
 
     let cors = CorsLayer::new()
