@@ -1,8 +1,8 @@
-use super::user_routes;
+use super::{upload_routes, user_routes};
 use axum::routing::{get, IntoMakeService};
 use axum::Router;
 use std::sync::Arc;
-use tower_http::cors::{CorsLayer, Any};
+use tower_http::cors::{Any, CorsLayer};
 use tower_http::trace::TraceLayer;
 
 use crate::app::state::{token_state, user_state};
@@ -14,6 +14,7 @@ pub fn routes(db_conn: Arc<Database>) -> IntoMakeService<Router> {
 
         user_routes::routes()
             .with_state(user_state)
+            .merge(upload_routes::routes())
             .merge(Router::new().route("/health", get(|| async { "Healthy..." })))
     };
 

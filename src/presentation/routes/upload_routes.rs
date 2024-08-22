@@ -4,29 +4,23 @@ use axum::{
     Router
 };
 use crate::{
-    app::{
-        middleware::verify_token::auth, 
-        state::user_state::UserState
-    }, 
-    presentation::handler::user_handler::{self, get_me}
+    app::middleware::verify_token::auth, 
+    presentation::handler::{upload_handler, user_handler::{self, get_me}}
 };
 
-pub fn routes() -> Router<UserState> {
+pub fn routes() -> Router {
     // Define routes that don't require authentication
     let unauthenticated_routes = Router::new()
-        .route("/register", post(user_handler::create_user))
-        .route("/login", post(user_handler::login));
+        .route("/", post(upload_handler::upload));
 
     // Define routes that require authentication
     let authenticated_routes = Router::new()
-        .route("/", get(user_handler::get_user))
-        .route("/me", get(get_me))
         .layer(middleware::from_fn(auth))
         .merge(unauthenticated_routes); // Apply authentication middleware here
 
     // Combine both routers, with authenticated routes nested under `/user`
     let router = Router::new()
-        .nest("/user", authenticated_routes); // Routes requiring authentication
+        .nest("/upload", authenticated_routes); // Routes requiring authentication
 
 
     router
