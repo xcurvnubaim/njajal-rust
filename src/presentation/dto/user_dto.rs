@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use validator::Validate;
 
 use crate::domain::entities::user_entities::GetUser;
 
@@ -23,9 +24,11 @@ pub struct GetAllUserDTO {
     pub users: Vec<GetUser>,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Validate)]
 pub struct CreateUserDTO {
+    #[validate(length(min = 3))]
     pub name: String,
+    #[validate(email)]
     pub email: String,
     pub password: String,
 }

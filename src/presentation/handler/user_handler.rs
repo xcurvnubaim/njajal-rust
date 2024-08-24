@@ -1,6 +1,7 @@
 use axum::extract::Request;
 use axum::http::StatusCode;
 use axum::{extract::State, Json};
+use validator::Validate;
 
 use crate::app::response::error::ErrorResponse;
 use crate::app::response::success::SuccessResponse;
@@ -40,6 +41,16 @@ pub async fn create_user(
     State(user_state): State<UserState>,
     Json(payload): Json<CreateUserDTO>,
 ) -> Result<(StatusCode, Json<SuccessResponse<GetUserDTO>>), (StatusCode, Json<ErrorResponse>)> {
+
+    match payload.validate() {
+        Ok(_) => {}
+        Err(err) => {
+            return Err((
+                StatusCode::BAD_REQUEST,
+                Json(ErrorResponse::new("Validation error".to_string(), err.to_string())),
+            ));
+        }
+    }
 
     match user_state
         .user_usecase
